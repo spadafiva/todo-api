@@ -1,3 +1,8 @@
-/**
- * Created by spadafiva on 6/29/17.
- */
+'use strict';
+
+var env = process.env.NODE_ENV || 'development';
+var config = require('./knexfile')[env];
+var knex = require('knex')(config);
+var bookshelf = require('bookshelf')(knex);
+
+module.exports = bookshelf;

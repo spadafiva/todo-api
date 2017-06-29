@@ -1,12 +1,10 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var _ = require('underscore');
+var Todo = require('./models/todo-item');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
 
-var todos = [];
-var todoNextId = 1;
 
 app.use(bodyParser.json());
 
@@ -16,98 +14,74 @@ app.get('/', function (req, res) {
 
 // GET /todos
 app.get('/todos', function (req, res) {
-    res.json(todos);
+    Todo.fetchAll()
+        .then(function (todos) {
+            res.json(todos);
+        }).catch(function(e){
+        res.status(400).send();
+    });
 });
 
 // GET /todos/:id
 app.get('/todos/:id', function (req, res) {
-    var idToFind = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: idToFind});
 
-    if (matchedTodo) {
-        res.json(matchedTodo);
-    } else {
-        res.status(404).send();
-    }
+    Todo.where({id: req.params.id})
+        .fetch()
+        .then(function (todo) {
+            res.json(todo);
+        }).catch(function(e){
+        res.status(400).send();
+    })
 });
 
 // POST /todos
 app.post('/todos', function (req, res) {
-    var body = req.body;
-    body = _.pick(body, ['description', 'completed']);
-    body.description = body.description.trim();
 
-    var incomplete = !_.isBoolean(body.completed);
-    var missingBody = !_.isString(body.description);
-    var emptyRequest = body.description === 0;
 
-    if (incomplete || missingBody || emptyRequest) {
-        return res.status(400).send()
-    } else {
-        body.id = todoNextId;
-        todos.push(body);
-        todoNextId++;
-        res.json(body);
-    }
+    new Todo({
+        description: req.body.description,
+        completed: req.body.completed
+    })
+        .save()
+        .then(function (saved) {
+            res.json(saved);
+        }).catch(function(e){
+            res.status(400).send();
+    })
 });
 
 
 // DELETE /todos/:id
 app.delete('/todos/:id', function (req, res) {
-    var id = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: id});
-
-    if (matchedTodo) {
-        todos = _.without(todos, matchedTodo);
-        res.json(matchedTodo);
-    } else {
-        res.status(404).send();
-    }
-
+    Todo
+        .where('id', req.params.id)
+        .destroy()
+        .then(function(destroyed){
+            res.json(destroyed);
+        }).catch(function(e){
+        res.status(400).send();
+    })
 });
 
 // PUT /todos/:id
 app.put('/todos/:id', function (req, res) {
-    var body = _.pick(req.body, ['description', 'completed']);
-    var validAttributes = {};
 
-    if (body.hasOwnProperty('completed')) {
-       if(_.isBoolean(body.completed)) {
-           validAttributes.completed = body.completed;
-       } else {
-           return res.status(400).send();
-       }
-    } else {
-        // not updating, no attribute provided
-    }
+    Todo.where({id: req.params.id})
+        .fetch()
+        .then(function (todo) {
 
-    if (body.hasOwnProperty('description')) {
-        body.description = body.description.trim();
-        var missingBody = !_.isString(body.description);
-        var emptyRequest = body.description === 0;
+            return  todo.save(req.body);
 
-        if (missingBody || emptyRequest) {
-            // bad
-            return res.status(400).send();
-        } else {
-            // good
-            validAttributes.description = body.description;
-        }
-    } else {
-        // not updating, we're good here
-    }
+        }).then(function (savedUser) {
 
-    var id = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: id});
+        return res.json(savedUser);
 
-    if (!matchedTodo) {
-        return res.status(404).send();
-    }
+    }).catch(function(e){
 
-    _.extend(matchedTodo, validAttributes)
-    res.json(matchedTodo);
+        res.status(400).send();
 
-})
+    });
+});
 
 
 

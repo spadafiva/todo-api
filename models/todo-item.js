@@ -1,3 +1,9 @@
-/**
- * Created by spadafiva on 6/29/17.
- */
+'use strict';
+
+var bookshelf = require('../bookshelf');
+
+var Todo = bookshelf.Model.extend({
+    tableName: 'todos',
+});
+
+module.exports = Todo;
