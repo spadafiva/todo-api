@@ -64,7 +64,52 @@ app.delete('/todos/:id', function (req, res) {
         res.status(404).send();
     }
 
+});
+
+// PUT /todos/:id
+app.put('/todos/:id', function (req, res) {
+    var body = _.pick(req.body, ['description', 'completed']);
+    var validAttributes = {};
+
+    if (body.hasOwnProperty('completed')) {
+       if(_.isBoolean(body.completed)) {
+           validAttributes.completed = body.completed;
+       } else {
+           return res.status(400).send();
+       }
+    } else {
+        // not updating, no attribute provided
+    }
+
+    if (body.hasOwnProperty('description')) {
+        body.description = body.description.trim();
+        var missingBody = !_.isString(body.description);
+        var emptyRequest = body.description === 0;
+
+        if (missingBody || emptyRequest) {
+            // bad
+            return res.status(400).send();
+        } else {
+            // good
+            validAttributes.description = body.description;
+        }
+    } else {
+        // not updating, we're good here
+    }
+
+    var id = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: id});
+
+    if (!matchedTodo) {
+        return res.status(404).send();
+    }
+
+    _.extend(matchedTodo, validAttributes)
+    res.json(matchedTodo);
+
 })
+
+
 
 
 
