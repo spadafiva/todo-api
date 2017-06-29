@@ -34,11 +34,14 @@ app.get('/todos/:id', function (req, res) {
 // POST /todos
 app.post('/todos', function (req, res) {
     var body = req.body;
+    body = _.pick(body, ['description', 'completed']);
+    body.description = body.description.trim();
 
     var incomplete = !_.isBoolean(body.completed);
     var missingBody = !_.isString(body.description);
+    var emptyRequest = body.description === 0;
 
-    if (incomplete || missingBody) {
+    if (incomplete || missingBody || emptyRequest) {
         return res.status(400).send()
     } else {
         body.id = todoNextId;
