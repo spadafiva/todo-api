@@ -5,6 +5,7 @@ var Todo = require('./models/todo-item');
 var app = express();
 var PORT = process.env.PORT || 3000;
 
+console.log(process.env.DATABASE_URL);
 
 app.use(bodyParser.json());
 
