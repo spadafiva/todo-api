@@ -9,9 +9,6 @@ module.exports = {
     },
     production: {
         client: 'postgresql',
-        connection: {
-            host: process.env.DATABASE_URL,
-            database: 'sequr'
-        }
+        connection: JSON.parse(process.env.DATABASE_URL);
     }
 }
