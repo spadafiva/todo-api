@@ -9,6 +9,6 @@ module.exports = {
     },
     production: {
         client: 'postgresql',
-        connection: JSON.parse(process.env.DATABASE_URL);
+        connection: JSON.parse(process.env.DATABASE_URL)
     }
 }
