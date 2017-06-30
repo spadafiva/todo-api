@@ -5,8 +5,6 @@ var Todo = require('./models/todo-item');
 var app = express();
 var PORT = process.env.PORT || 3000;
 
-console.log(process.env.DATABASE_URL);
-
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
@@ -15,11 +13,18 @@ app.get('/', function (req, res) {
 
 // GET /todos
 app.get('/todos', function (req, res) {
-    Todo.fetchAll()
+    var completedQuery = req.query.completed;
+    var filters = {};
+    if (completedQuery) {
+        filters.completed = completedQuery;
+    }
+    console.log(filters);
+    Todo.where(filters)
+        .fetchAll()
         .then(function (todos) {
             res.json(todos);
         }).catch(function(e){
-        res.status(400).send();
+        res.status(400).send(e);
     });
 });
 
@@ -31,7 +36,7 @@ app.get('/todos/:id', function (req, res) {
         .then(function (todo) {
             res.json(todo);
         }).catch(function(e){
-        res.status(400).send();
+        res.status(400).send(e);
     })
 });
 
@@ -47,7 +52,7 @@ app.post('/todos', function (req, res) {
         .then(function (saved) {
             res.json(saved);
         }).catch(function(e){
-            res.status(400).send();
+            res.status(400).send(e);
     })
 });
 
@@ -60,7 +65,7 @@ app.delete('/todos/:id', function (req, res) {
         .then(function(destroyed){
             res.json(destroyed);
         }).catch(function(e){
-        res.status(400).send();
+        res.status(400).send(e);
     })
 });
 
@@ -79,7 +84,7 @@ app.put('/todos/:id', function (req, res) {
 
     }).catch(function(e){
 
-        res.status(400).send();
+        res.status(400).send(e);
 
     });
 });
