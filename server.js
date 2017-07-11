@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var Todo = require('./models/todo-item');
+var User = require('./models/user-item');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
