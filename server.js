@@ -21,6 +21,30 @@ app.get('/users', function (req, res) {
         })
 });
 
+app.post('/login', function (req, res) {
+    User.where({username: req.body.username })
+        .fetch()
+        .then(function(user) {
+            console.log(user);
+
+            if (user.attributes.password == req.body.password) {
+                console.log("sucessful login");
+
+                res.json({
+                    login: true,
+                    user: {
+                        id: user.attributes.id,
+                        username: user.attributes.username
+                    }
+                });
+
+            } else {
+                console.log("failed login");
+                res.status(400).json({ meta : { message: "Invalid username or password"}});            }
+
+        });
+});
+
 app.post('/users', function (req, res) {
     new User({
         username: req.body.username,
